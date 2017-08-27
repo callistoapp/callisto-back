@@ -2,46 +2,60 @@ package models
 
 import (
 	"log"
+	"github.com/graphql-go/graphql"
 )
 
-type Project struct {
+type Release struct {
 	Id int `json:"id",db:"id"`
-	Name string `json:"name",db:"name"`
-	Description string `json:"description",db:"description"`
-	Repository string `json:"repository",db:"repository"`
-	Url string `json:"url",db:"url"`
-	Status int `json:"status",db:"status"`
+	Version string `json:"version",db:"version"`
 }
 
-func AllProjects() ([]*Project, error) {
-	rows, err := db.Query(`SELECT * FROM projects`)
+
+// define custom GraphQL ObjectType `ReleaseType` for our Golang struct `Release`
+// Note that
+// - the fields in our ReleaseType maps with the json tags for the fields in our struct
+// - the field type matches the field type in our struct
+var ReleaseType = graphql.NewObject(graphql.ObjectConfig{
+	Name: "Release",
+	Fields: graphql.Fields{
+		"id": &graphql.Field{
+			Type: graphql.Int,
+		},
+		"version": &graphql.Field{
+			Type: graphql.String,
+		},
+	},
+})
+
+func AllReleases() ([]*Release, error) {
+	rows, err := db.Query(`SELECT * FROM releases`)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	prjs := make([]*Project, 0)
+	rels := make([]*Release, 0)
 
 	for rows.Next() {
-		prj := new(Project)
-		err := rows.Scan(&prj.Name, &prj.Description, &prj.Repository, &prj.Url, &prj.Status, &prj.Id)
+		rel := new(Release)
+		err := rows.Scan(&rel.Version, &rel.Id)
 		if err != nil {
 			return nil, err
 		}
-		prjs = append(prjs, prj)
+		rels = append(rels, rel)
 	}
 	if err = rows.Err(); err != nil {
 		return nil, err
 	}
-	return prjs, nil
+	return rels, nil
 }
 
-func NewProject(prj Project) (error) {
-	stmt, err := db.Prepare("INSERT INTO projects(name, description, repository, url, status) VALUES($1, $2, $3, $4, $5)")
+func NewRelease(rel Release) (error) {
+	stmt, err := db.Prepare("INSERT INTO releases(version) VALUES($1)")
 	if err != nil {
 		return err
 	}
-	res, err := stmt.Exec(prj.Name, prj.Description, prj.Repository, prj.Url, prj.Status)
+	res, err := stmt.Exec(rel.Version)
 	if err != nil {
 		return err
 	}

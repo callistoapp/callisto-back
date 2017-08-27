@@ -2,46 +2,69 @@ package models
 
 import (
 	"log"
+	"github.com/graphql-go/graphql"
 )
 
-type Project struct {
+type User struct {
 	Id int `json:"id",db:"id"`
 	Name string `json:"name",db:"name"`
-	Description string `json:"description",db:"description"`
-	Repository string `json:"repository",db:"repository"`
-	Url string `json:"url",db:"url"`
-	Status int `json:"status",db:"status"`
+	Email string `json:"email",db:"email"`
+	Phone string `json:"phone",db:"phone"`
 }
 
-func AllProjects() ([]*Project, error) {
-	rows, err := db.Query(`SELECT * FROM projects`)
+
+// define custom GraphQL ObjectType `UserType` for our Golang struct `User`
+// Note that
+// - the fields in our UserType maps with the json tags for the fields in our struct
+// - the field type matches the field type in our struct
+var UserType = graphql.NewObject(graphql.ObjectConfig{
+	Name: "User",
+	Fields: graphql.Fields{
+		"id": &graphql.Field{
+			Type: graphql.Int,
+		},
+		"name": &graphql.Field{
+			Type: graphql.String,
+		},
+		"email": &graphql.Field{
+			Type: graphql.String,
+		},
+		"phone": &graphql.Field{
+			Type: graphql.String,
+		},
+	},
+})
+
+
+func AllUsers() ([]*User, error) {
+	rows, err := db.Query(`SELECT * FROM users`)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	prjs := make([]*Project, 0)
+	usrs := make([]*User, 0)
 
 	for rows.Next() {
-		prj := new(Project)
-		err := rows.Scan(&prj.Name, &prj.Description, &prj.Repository, &prj.Url, &prj.Status, &prj.Id)
+		usr := new(User)
+		err := rows.Scan(&usr.Name, &usr.Email, &usr.Phone)
 		if err != nil {
 			return nil, err
 		}
-		prjs = append(prjs, prj)
+		usrs = append(usrs, usr)
 	}
 	if err = rows.Err(); err != nil {
 		return nil, err
 	}
-	return prjs, nil
+	return usrs, nil
 }
 
-func NewProject(prj Project) (error) {
-	stmt, err := db.Prepare("INSERT INTO projects(name, description, repository, url, status) VALUES($1, $2, $3, $4, $5)")
+func NewUser(usr User) (error) {
+	stmt, err := db.Prepare("INSERT INTO users(name, email, phone) VALUES($1, $2, $3)")
 	if err != nil {
 		return err
 	}
-	res, err := stmt.Exec(prj.Name, prj.Description, prj.Repository, prj.Url, prj.Status)
+	res, err := stmt.Exec(usr.Name, usr.Email, usr.Phone)
 	if err != nil {
 		return err
 	}

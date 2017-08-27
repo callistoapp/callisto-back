@@ -2,46 +2,72 @@ package models
 
 import (
 	"log"
+	"github.com/graphql-go/graphql"
 )
 
-type Project struct {
+type Task struct {
 	Id int `json:"id",db:"id"`
 	Name string `json:"name",db:"name"`
 	Description string `json:"description",db:"description"`
-	Repository string `json:"repository",db:"repository"`
-	Url string `json:"url",db:"url"`
+	Type int `json:"type",db:"type"`
 	Status int `json:"status",db:"status"`
 }
 
-func AllProjects() ([]*Project, error) {
-	rows, err := db.Query(`SELECT * FROM projects`)
+// define custom GraphQL ObjectType `TaskType` for our Golang struct `Task`
+// Note that
+// - the fields in our TaskType maps with the json tags for the fields in our struct
+// - the field type matches the field type in our struct
+var TaskType = graphql.NewObject(graphql.ObjectConfig{
+	Name: "Task",
+	Fields: graphql.Fields{
+		"id": &graphql.Field{
+			Type: graphql.Int,
+		},
+		"name": &graphql.Field{
+			Type: graphql.String,
+		},
+		"description": &graphql.Field{
+			Type: graphql.String,
+		},
+		"type": &graphql.Field{
+			Type: graphql.Int,
+		},
+		"status": &graphql.Field{
+			Type: graphql.Int,
+		},
+	},
+})
+
+
+func AllTasks() ([]*Task, error) {
+	rows, err := db.Query(`SELECT * FROM tasks`)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	prjs := make([]*Project, 0)
+	tsks := make([]*Task, 0)
 
 	for rows.Next() {
-		prj := new(Project)
-		err := rows.Scan(&prj.Name, &prj.Description, &prj.Repository, &prj.Url, &prj.Status, &prj.Id)
+		tsk := new(Task)
+		err := rows.Scan(&tsk.Name, &tsk.Description, &tsk.Type, &tsk.Status, &tsk.Id)
 		if err != nil {
 			return nil, err
 		}
-		prjs = append(prjs, prj)
+		tsks = append(tsks, tsk)
 	}
 	if err = rows.Err(); err != nil {
 		return nil, err
 	}
-	return prjs, nil
+	return tsks, nil
 }
 
-func NewProject(prj Project) (error) {
-	stmt, err := db.Prepare("INSERT INTO projects(name, description, repository, url, status) VALUES($1, $2, $3, $4, $5)")
+func NewTask(tsk Task) (error) {
+	stmt, err := db.Prepare("INSERT INTO tasks(name, description, type, status) VALUES($1, $2, $3, $4)")
 	if err != nil {
 		return err
 	}
-	res, err := stmt.Exec(prj.Name, prj.Description, prj.Repository, prj.Url, prj.Status)
+	res, err := stmt.Exec(tsk.Name, tsk.Description, tsk.Type, tsk.Status)
 	if err != nil {
 		return err
 	}

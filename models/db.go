@@ -1,11 +1,21 @@
-package main
+package models
 
+import (
+	"database/sql"
+	_ "github.com/lib/pq"
+	"log"
+)
 
-type Todo struct {
-	ID   string `json:"id"`
-	Text string `json:"text"`
-	Done bool   `json:"done"`
+var db *sql.DB
+
+func InitDB(dataSourceName string) {
+	var err error
+	db, err = sql.Open("postgres", dataSourceName)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	if err = db.Ping(); err != nil {
+		log.Panic(err)
+	}
 }
-
-
-var TodoList []Todo
