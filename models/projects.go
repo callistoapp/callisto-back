@@ -12,6 +12,7 @@ type Project struct {
 	Repository string `json:"repository",db:"repository"`
 	Url string `json:"url",db:"url"`
 	Status int `json:"status",db:"status"`
+	Tasks []*Task `json:"tasks"`
 }
 
 
@@ -40,8 +41,43 @@ var ProjectType = graphql.NewObject(graphql.ObjectConfig{
 		"status": &graphql.Field{
 			Type: graphql.Int,
 		},
+		"tasks": &graphql.Field{
+			Type: graphql.NewList(TaskType),
+		},
 	},
 })
+
+
+func ProjectFromId(id int) (*Project, error) {
+	row := db.QueryRow(`SELECT * FROM projects WHERE id=$1`, id)
+
+	prj := new(Project)
+
+	err := row.Scan(&prj.Name, &prj.Description, &prj.Repository, &prj.Url, &prj.Status, &prj.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	prj.Tasks, err = TasksForProject(prj.Id)
+
+	return prj, nil
+}
+
+
+func ProjectFromName(name string) (*Project, error) {
+	row := db.QueryRow(`SELECT * FROM projects WHERE name=$1`, name)
+
+	prj := new(Project)
+
+	err := row.Scan(&prj.Name, &prj.Description, &prj.Repository, &prj.Url, &prj.Status, &prj.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	prj.Tasks, err = TasksForProject(prj.Id)
+
+	return prj, nil
+}
 
 
 func AllProjects() ([]*Project, error) {
@@ -55,10 +91,15 @@ func AllProjects() ([]*Project, error) {
 
 	for rows.Next() {
 		prj := new(Project)
+		if err != nil {
+			return nil, err
+		}
 		err := rows.Scan(&prj.Name, &prj.Description, &prj.Repository, &prj.Url, &prj.Status, &prj.Id)
 		if err != nil {
 			return nil, err
 		}
+		prj.Tasks, err = TasksForProject(prj.Id)
+
 		prjs = append(prjs, prj)
 	}
 	if err = rows.Err(); err != nil {

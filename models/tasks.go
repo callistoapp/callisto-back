@@ -7,6 +7,7 @@ import (
 
 type Task struct {
 	Id int `json:"id",db:"id"`
+	ProjectId int `json:"projectId",db:"projectId"`
 	Name string `json:"name",db:"name"`
 	Description string `json:"description",db:"description"`
 	Type int `json:"type",db:"type"`
@@ -21,6 +22,9 @@ var TaskType = graphql.NewObject(graphql.ObjectConfig{
 	Name: "Task",
 	Fields: graphql.Fields{
 		"id": &graphql.Field{
+			Type: graphql.Int,
+		},
+		"projectId": &graphql.Field{
 			Type: graphql.Int,
 		},
 		"name": &graphql.Field{
@@ -38,7 +42,6 @@ var TaskType = graphql.NewObject(graphql.ObjectConfig{
 	},
 })
 
-
 func AllTasks() ([]*Task, error) {
 	rows, err := db.Query(`SELECT * FROM tasks`)
 	if err != nil {
@@ -50,7 +53,30 @@ func AllTasks() ([]*Task, error) {
 
 	for rows.Next() {
 		tsk := new(Task)
-		err := rows.Scan(&tsk.Name, &tsk.Description, &tsk.Type, &tsk.Status, &tsk.Id)
+		err := rows.Scan(&tsk.Name, &tsk.Description, &tsk.Type, &tsk.Status, &tsk.Id, &tsk.ProjectId)
+		if err != nil {
+			return nil, err
+		}
+		tsks = append(tsks, tsk)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+	return tsks, nil
+}
+
+func TasksForProject(id int) ([]*Task, error) {
+	rows, err := db.Query(`SELECT * FROM tasks WHERE id=$1`, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	tsks := make([]*Task, 0)
+
+	for rows.Next() {
+		tsk := new(Task)
+		err := rows.Scan(&tsk.Name, &tsk.Description, &tsk.Type, &tsk.Status, &tsk.Id, &tsk.ProjectId)
 		if err != nil {
 			return nil, err
 		}
@@ -67,7 +93,7 @@ func NewTask(tsk Task) (error) {
 	if err != nil {
 		return err
 	}
-	res, err := stmt.Exec(tsk.Name, tsk.Description, tsk.Type, tsk.Status)
+	res, err := stmt.Exec(tsk.ProjectId, tsk.Name, tsk.Description, tsk.Type, tsk.Status)
 	if err != nil {
 		return err
 	}
