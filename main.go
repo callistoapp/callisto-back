@@ -65,9 +65,8 @@ func executeQuery(query QueryStruct, schema graphql.Schema) *graphql.Result {
 }
 
 func main() {
-	models.InitDB("user=postgres dbname=callisto password=291092 host=localhost port=5432 sslmode=disable")
+	models.InitDB("user=callisto dbname=callisto password=postgrespassword host=172.19.0.2 port=5432 sslmode=disable")
 	http.HandleFunc("/graphql", func(w http.ResponseWriter, r *http.Request) {
-
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 		w.Header().Set("Access-Control-Allow-Headers",

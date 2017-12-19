@@ -1,0 +1,32 @@
+version: '2.1'
+
+services:
+  postgres:
+    image: postgres
+    ports:
+      - 5432:5432
+    networks:
+      - callisto-network
+    environment:
+      POSTGRES_PASSWORD: postgrespassword
+      POSTGRES_USER: callisto
+    volumes:
+      - ./initdb:/docker-entrypoint-initdb.d:rw
+
+  app:
+    build: .
+    ports:
+      - 8080:8080
+      - 5002:5002
+    networks:
+      - callisto-network
+    volumes:
+      - .:/go/src/callisto:rw
+    depends_on:
+      - postgres
+    mem_limit: 1024MB
+    cpu_shares: 512
+
+networks:
+  callisto-network:
+     driver: bridge
