@@ -7,6 +7,7 @@ import (
 
 type Release struct {
 	Id int `json:"id",db:"id"`
+	ProjectId int `json:"projectId",db:"projectId"`
 	Version string `json:"version",db:"version"`
 }
 
@@ -38,7 +39,7 @@ func AllReleases() ([]*Release, error) {
 
 	for rows.Next() {
 		rel := new(Release)
-		err := rows.Scan(&rel.Version, &rel.Id)
+		err := rows.Scan(&rel.Id, &rel.ProjectId, &rel.Version)
 		if err != nil {
 			return nil, err
 		}
@@ -49,6 +50,31 @@ func AllReleases() ([]*Release, error) {
 	}
 	return rels, nil
 }
+
+
+func ReleasesForProject(id int) ([]*Release, error) {
+	rows, err := db.Query(`SELECT * FROM releases WHERE projectId=$1`, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	rels := make([]*Release, 0)
+
+	for rows.Next() {
+		rel := new(Release)
+		err := rows.Scan(&rel.Id, &rel.ProjectId, &rel.Version)
+		if err != nil {
+			return nil, err
+		}
+		rels = append(rels, rel)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+	return rels, nil
+}
+
 
 func NewRelease(rel Release) (error) {
 	stmt, err := db.Prepare("INSERT INTO releases(version) VALUES($1)")
