@@ -1,7 +1,6 @@
 package models
 
 import (
-	"log"
 	"github.com/graphql-go/graphql"
 )
 
@@ -53,7 +52,7 @@ func AllTasks() ([]*Task, error) {
 
 	for rows.Next() {
 		tsk := new(Task)
-		err := rows.Scan(&tsk.Name, &tsk.Description, &tsk.Type, &tsk.Status, &tsk.Id, &tsk.ProjectId)
+		err := rows.Scan(&tsk.Id, &tsk.ProjectId, &tsk.Name, &tsk.Description, &tsk.Type, &tsk.Status)
 		if err != nil {
 			return nil, err
 		}
@@ -66,7 +65,7 @@ func AllTasks() ([]*Task, error) {
 }
 
 func TasksForProject(id int) ([]*Task, error) {
-	rows, err := db.Query(`SELECT * FROM tasks WHERE id=$1`, id)
+	rows, err := db.Query(`SELECT * FROM tasks WHERE projectId=$1`, id)
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +75,7 @@ func TasksForProject(id int) ([]*Task, error) {
 
 	for rows.Next() {
 		tsk := new(Task)
-		err := rows.Scan(&tsk.Name, &tsk.Description, &tsk.Type, &tsk.Status, &tsk.Id, &tsk.ProjectId)
+		err := rows.Scan(&tsk.Id, &tsk.ProjectId, &tsk.Name, &tsk.Description, &tsk.Type, &tsk.Status)
 		if err != nil {
 			return nil, err
 		}
@@ -89,14 +88,25 @@ func TasksForProject(id int) ([]*Task, error) {
 }
 
 func NewTask(tsk Task) (error) {
-	stmt, err := db.Prepare("INSERT INTO tasks(name, description, type, status) VALUES($1, $2, $3, $4)")
+	stmt, err := db.Prepare("INSERT INTO tasks(projectId, name, description, type, status) VALUES($1, $2, $3, $4, $5)")
 	if err != nil {
 		return err
 	}
-	res, err := stmt.Exec(tsk.ProjectId, tsk.Name, tsk.Description, tsk.Type, tsk.Status)
+	_, err = stmt.Exec(tsk.ProjectId, tsk.Name, tsk.Description, tsk.Type, tsk.Status)
 	if err != nil {
 		return err
 	}
-	log.Printf("Result = %+v", res)
+	return nil
+}
+
+func MoveTask(id int, status int) (error) {
+	stmt, err := db.Prepare("UPDATE tasks SET status=$1 WHERE id=$2")
+	if err != nil {
+		return err
+	}
+	_, err = stmt.Exec(status, id)
+	if err != nil {
+		return err
+	}
 	return nil
 }
