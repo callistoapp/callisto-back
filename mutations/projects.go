@@ -25,7 +25,7 @@ var CreateProject = &graphql.Field{
 			Type: graphql.NewNonNull(graphql.String),
 		},
 		"status": &graphql.ArgumentConfig{
-			Type: graphql.NewNonNull(graphql.Int),
+			Type: graphql.Int,
 		},
 	},
 	Resolve: func(params graphql.ResolveParams) (interface{}, error) {
@@ -46,9 +46,9 @@ var CreateProject = &graphql.Field{
 			Status:      0,
 		}
 
-		err := models.NewProject(newProject)
+		id, err := models.NewProject(newProject)
 
-		return newProject, err
+		return id, err
 	},
 }
 
