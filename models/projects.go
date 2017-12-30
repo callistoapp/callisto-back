@@ -1,7 +1,6 @@
 package models
 
 import (
-	"log"
 	"github.com/graphql-go/graphql"
 )
 
@@ -13,6 +12,7 @@ type Project struct {
 	Url string `json:"url",db:"url"`
 	Status int `json:"status",db:"status"`
 	Tasks []*Task `json:"tasks"`
+	Releases []*Release `json:"releases"`
 }
 
 
@@ -44,6 +44,9 @@ var ProjectType = graphql.NewObject(graphql.ObjectConfig{
 		"tasks": &graphql.Field{
 			Type: graphql.NewList(TaskType),
 		},
+		"releases": &graphql.Field{
+			Type: graphql.NewList(ReleaseType),
+		},
 	},
 })
 
@@ -53,7 +56,7 @@ func ProjectFromId(id int) (*Project, error) {
 
 	prj := new(Project)
 
-	err := row.Scan(&prj.Name, &prj.Description, &prj.Repository, &prj.Url, &prj.Status, &prj.Id)
+	err := row.Scan(&prj.Id, &prj.Name, &prj.Description, &prj.Repository, &prj.Url, &prj.Status)
 	if err != nil {
 		return nil, err
 	}
@@ -62,6 +65,7 @@ func ProjectFromId(id int) (*Project, error) {
 
 	return prj, nil
 }
+
 
 
 func ProjectFromName(name string) (*Project, error) {
@@ -69,7 +73,7 @@ func ProjectFromName(name string) (*Project, error) {
 
 	prj := new(Project)
 
-	err := row.Scan(&prj.Name, &prj.Description, &prj.Repository, &prj.Url, &prj.Status, &prj.Id)
+	err := row.Scan(&prj.Id, &prj.Name, &prj.Description, &prj.Repository, &prj.Url, &prj.Status)
 	if err != nil {
 		return nil, err
 	}
@@ -78,6 +82,7 @@ func ProjectFromName(name string) (*Project, error) {
 
 	return prj, nil
 }
+
 
 
 func AllProjects() ([]*Project, error) {
@@ -94,11 +99,12 @@ func AllProjects() ([]*Project, error) {
 		if err != nil {
 			return nil, err
 		}
-		err := rows.Scan(&prj.Name, &prj.Description, &prj.Repository, &prj.Url, &prj.Status, &prj.Id)
+		err := rows.Scan(&prj.Id, &prj.Name, &prj.Description, &prj.Repository, &prj.Url, &prj.Status)
 		if err != nil {
 			return nil, err
 		}
 		prj.Tasks, err = TasksForProject(prj.Id)
+		prj.Releases, err = ReleasesForProject(prj.Id)
 
 		prjs = append(prjs, prj)
 	}
@@ -108,15 +114,11 @@ func AllProjects() ([]*Project, error) {
 	return prjs, nil
 }
 
-func NewProject(prj Project) (error) {
-	stmt, err := db.Prepare("INSERT INTO projects(name, description, repository, url, status) VALUES($1, $2, $3, $4, $5)")
+func NewProject(prj Project) (int, error) {
+	id := 0
+	err := db.QueryRow("INSERT INTO projects(name, description, repository, url, status) VALUES($1, $2, $3, $4, $5) RETURNING id", &prj.Name, &prj.Description, &prj.Repository, &prj.Url, 0).Scan(&id)
 	if err != nil {
-		return err
+		return 0, err
 	}
-	res, err := stmt.Exec(prj.Name, prj.Description, prj.Repository, prj.Url, prj.Status)
-	if err != nil {
-		return err
-	}
-	log.Printf("Result = %+v", res)
-	return nil
+	return id, nil
 }
