@@ -10,7 +10,7 @@ type Task struct {
 	Name string `json:"name",db:"name"`
 	Description string `json:"description",db:"description"`
 	Type int `json:"type",db:"type"`
-	Status int `json:"status",db:"status"`
+	StatusId int `json:"statusId",db:"statusId"`
 }
 
 // define custom GraphQL ObjectType `TaskType` for our Golang struct `Task`
@@ -35,7 +35,7 @@ var TaskType = graphql.NewObject(graphql.ObjectConfig{
 		"type": &graphql.Field{
 			Type: graphql.Int,
 		},
-		"status": &graphql.Field{
+		"statusId": &graphql.Field{
 			Type: graphql.Int,
 		},
 	},
@@ -52,7 +52,7 @@ func AllTasks() ([]*Task, error) {
 
 	for rows.Next() {
 		tsk := new(Task)
-		err := rows.Scan(&tsk.Id, &tsk.ProjectId, &tsk.Name, &tsk.Description, &tsk.Type, &tsk.Status)
+		err := rows.Scan(&tsk.Id, &tsk.ProjectId, &tsk.Name, &tsk.Description, &tsk.Type, &tsk.StatusId)
 		if err != nil {
 			return nil, err
 		}
@@ -75,7 +75,7 @@ func TasksForProject(id int) ([]*Task, error) {
 
 	for rows.Next() {
 		tsk := new(Task)
-		err := rows.Scan(&tsk.Id, &tsk.ProjectId, &tsk.Name, &tsk.Description, &tsk.Type, &tsk.Status)
+		err := rows.Scan(&tsk.Id, &tsk.ProjectId, &tsk.Name, &tsk.Description, &tsk.Type, &tsk.StatusId)
 		if err != nil {
 			return nil, err
 		}
@@ -92,7 +92,7 @@ func NewTask(tsk Task) (error) {
 	if err != nil {
 		return err
 	}
-	_, err = stmt.Exec(tsk.ProjectId, tsk.Name, tsk.Description, tsk.Type, tsk.Status)
+	_, err = stmt.Exec(tsk.ProjectId, tsk.Name, tsk.Description, tsk.Type, tsk.StatusId)
 	if err != nil {
 		return err
 	}
@@ -100,7 +100,8 @@ func NewTask(tsk Task) (error) {
 }
 
 func MoveTask(id int, status int) (error) {
-	stmt, err := db.Prepare("UPDATE tasks SET status=$1 WHERE id=$2")
+	// TODO: Add check on status
+	stmt, err := db.Prepare("UPDATE tasks SET statusId=$1 WHERE id=$2")
 	if err != nil {
 		return err
 	}

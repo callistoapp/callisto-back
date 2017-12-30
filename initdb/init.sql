@@ -1,29 +1,38 @@
-CREATE TABLE tasks (
-    name        varchar(140) NOT NULL,
-    id          integer CONSTRAINT taskId PRIMARY KEY,
-    projectId   date,
-    description varchar(140),
-    type        integer,
-    status      integer
+CREATE TABLE projects (
+    id          SERIAL PRIMARY KEY,
+    name        VARCHAR(140) NOT NULL,
+    description VARCHAR(140),
+    repository  VARCHAR(140),
+    url         VARCHAR(140),
+    status      INTEGER
 );
 
-CREATE TABLE projects (
-    name        varchar(140) NOT NULL,
-    id          integer CONSTRAINT projectId PRIMARY KEY,
-    description varchar(140),
-    repository  varchar(140),
-    url         varchar(140),
-    status      integer
+CREATE TABLE tasks (
+  id          SERIAL PRIMARY KEY,
+  projectId   INTEGER REFERENCES projects (id),
+  name        VARCHAR(140) NOT NULL,
+  description VARCHAR(140),
+  type        INTEGER,
+  statusId    INTEGER REFERENCES statuses (id)
+);
+
+CREATE TABLE statuses (
+  id          SERIAL PRIMARY KEY,
+  projectId   INTEGER REFERENCES projects (id),
+  name        VARCHAR(140) NOT NULL,
+  description VARCHAR(140),
+  index       INTEGER
 );
 
 CREATE TABLE users (
-    name        varchar(140) NOT NULL,
-    id          integer CONSTRAINT usersId PRIMARY KEY,
-    email       varchar(140),
-    phone       varchar(15)
+    id          SERIAL PRIMARY KEY,
+    name        VARCHAR(140) NOT NULL,
+    email       VARCHAR(140),
+    phone       VARCHAR(15)
 );
 
 CREATE TABLE releases (
-    version     varchar(140) NOT NULL,
-    id          integer CONSTRAINT releasesId PRIMARY KEY
+    id          SERIAL PRIMARY KEY,
+    projectId   INTEGER REFERENCES projects (id),
+    version     varchar(140) NOT NULL
 );
