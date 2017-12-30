@@ -17,38 +17,10 @@ type QueryStruct struct {
 	Variables     map[string]interface{} `json:"variables" url:"variables" schema:"variables"`
 }
 
-// root mutation
-var rootMutation = graphql.NewObject(graphql.ObjectConfig{
-	Name: "RootMutation",
-	Fields: graphql.Fields{
-		"createProject": mutations.CreateProject,
-		"createUser": mutations.CreateUser,
-		"createRelease": mutations.CreateRelease,
-		"createTask": mutations.CreateTask,
-	},
-})
-
-// root query
-// we just define a trivial example here, since root query is required.
-// Test with curl
-// curl -g 'http://localhost:8080/graphql?query={lastTodo{id,text,done}}'
-var rootQuery = graphql.NewObject(graphql.ObjectConfig{
-	Name: "RootQuery",
-	Fields: graphql.Fields{
-		"projectList": queries.ListProjects,
-		"project": queries.GetProject,
-		"projectByName": queries.GetProjectByName,
-		"userList": queries.ListUsers,
-		"releaseList": queries.ListReleases,
-		"taskList": queries.ListTasks,
-	},
-})
-
-
 // define schema, with our rootQuery and rootMutation
 var schema, _ = graphql.NewSchema(graphql.SchemaConfig{
-	Query:    rootQuery,
-	Mutation: rootMutation,
+	Query:    queries.Queries,
+	Mutation: mutations.Mutations,
 })
 
 
