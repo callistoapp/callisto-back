@@ -32,9 +32,10 @@ var CreateUser = &graphql.Field{
 		// perform mutation operation here
 		// for e.g. create a User and save to DB.
 		newUser := models.User{
-			Name:   name,
-			Email: email,
-			Phone: phone,
+			Name:    name,
+			Email:   email,
+			Phone:   phone,
+			Deleted: 0,
 		}
 
 		err := models.NewUser(newUser)

@@ -39,11 +39,12 @@ var CreateProject = &graphql.Field{
 		// perform mutation operation here
 		// for e.g. create a Project and save to DB.
 		newProject := models.Project{
-			Name:        name,
-			Description: description,
-			Repository:  repo,
-			Url:         url,
-			Status:      0,
+			Name:        	name,
+			Description: 	description,
+			Repository:  	repo,
+			Url:         	url,
+			Status:      	0,
+			Deleted:   		0,
 		}
 
 		id, err := models.NewProject(newProject)

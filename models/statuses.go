@@ -9,7 +9,8 @@ type Status struct {
 	ProjectId   int    `json:"projectId",db:"projectId"`
 	Name        string `json:"name",db:"name"`
 	Description string `json:"description",db:"description"`
-	Index       int    `json:"type",db:"type"`
+	Index       int    `json:"index",db:"index"`
+	Deleted     int    `json:"deleted",db:"deleted"`
 }
 
 // define custom GraphQL ObjectType `TaskType` for our Golang struct `Task`
@@ -34,6 +35,9 @@ var StatusType = graphql.NewObject(graphql.ObjectConfig{
 		"index": &graphql.Field{
 			Type: graphql.Int,
 		},
+		"deleted": &graphql.Field{
+			Type: graphql.Int,
+		},
 	},
 })
 
@@ -48,7 +52,7 @@ func AllStatuses() ([]*Status, error) {
 
 	for rows.Next() {
 		stt := new(Status)
-		err := rows.Scan(&stt.Id, &stt.ProjectId, &stt.Name, &stt.Description, &stt.Index)
+		err := rows.Scan(&stt.Id, &stt.ProjectId, &stt.Name, &stt.Description, &stt.Index, &stt.Deleted)
 		if err != nil {
 			return nil, err
 		}
@@ -71,7 +75,7 @@ func StatusesForProject(id int) ([]*Status, error) {
 
 	for rows.Next() {
 		stt := new(Status)
-		err := rows.Scan(&stt.Id, &stt.ProjectId, &stt.Name, &stt.Description, &stt.Index)
+		err := rows.Scan(&stt.Id, &stt.ProjectId, &stt.Name, &stt.Description, &stt.Index, &stt.Deleted)
 		if err != nil {
 			return nil, err
 		}
@@ -84,11 +88,11 @@ func StatusesForProject(id int) ([]*Status, error) {
 }
 
 func NewStatus(stt Status) (error) {
-	stmt, err := db.Prepare("INSERT INTO statuses(projectId, name, description, index) VALUES($1, $2, $3, $4)")
+	stmt, err := db.Prepare("INSERT INTO statuses(projectId, name, description, index, deleted) VALUES($1, $2, $3, $4, $5)")
 	if err != nil {
 		return err
 	}
-	_, err = stmt.Exec(stt.ProjectId, stt.Name, stt.Description, stt.Index)
+	_, err = stmt.Exec(stt.ProjectId, stt.Name, stt.Description, stt.Index, stt.Deleted)
 	if err != nil {
 		return err
 	}

@@ -6,11 +6,11 @@ import (
 )
 
 type Release struct {
-	Id int `json:"id",db:"id"`
-	ProjectId int `json:"projectId",db:"projectId"`
-	Version string `json:"version",db:"version"`
+	Id        int    `json:"id",db:"id"`
+	ProjectId int    `json:"projectId",db:"projectId"`
+	Version   string `json:"version",db:"version"`
+	Deleted   int    `json:"deleted",db:"deleted"`
 }
-
 
 // define custom GraphQL ObjectType `ReleaseType` for our Golang struct `Release`
 // Note that
@@ -22,8 +22,14 @@ var ReleaseType = graphql.NewObject(graphql.ObjectConfig{
 		"id": &graphql.Field{
 			Type: graphql.Int,
 		},
+		"projectId": &graphql.Field{
+			Type: graphql.Int,
+		},
 		"version": &graphql.Field{
 			Type: graphql.String,
+		},
+		"deleted": &graphql.Field{
+			Type: graphql.Int,
 		},
 	},
 })
@@ -39,7 +45,7 @@ func AllReleases() ([]*Release, error) {
 
 	for rows.Next() {
 		rel := new(Release)
-		err := rows.Scan(&rel.Id, &rel.ProjectId, &rel.Version)
+		err := rows.Scan(&rel.Id, &rel.ProjectId, &rel.Version, &rel.Deleted)
 		if err != nil {
 			return nil, err
 		}
@@ -50,7 +56,6 @@ func AllReleases() ([]*Release, error) {
 	}
 	return rels, nil
 }
-
 
 func ReleasesForProject(id int) ([]*Release, error) {
 	rows, err := db.Query(`SELECT * FROM releases WHERE projectId=$1`, id)
@@ -63,7 +68,7 @@ func ReleasesForProject(id int) ([]*Release, error) {
 
 	for rows.Next() {
 		rel := new(Release)
-		err := rows.Scan(&rel.Id, &rel.ProjectId, &rel.Version)
+		err := rows.Scan(&rel.Id, &rel.ProjectId, &rel.Version, &rel.Deleted)
 		if err != nil {
 			return nil, err
 		}
@@ -75,13 +80,12 @@ func ReleasesForProject(id int) ([]*Release, error) {
 	return rels, nil
 }
 
-
 func NewRelease(rel Release) (error) {
-	stmt, err := db.Prepare("INSERT INTO releases(version) VALUES($1)")
+	stmt, err := db.Prepare("INSERT INTO releases(version, deleted) VALUES($1, $2)")
 	if err != nil {
 		return err
 	}
-	res, err := stmt.Exec(rel.Version)
+	res, err := stmt.Exec(rel.Version, rel.Deleted)
 	if err != nil {
 		return err
 	}

@@ -1,10 +1,11 @@
 CREATE TABLE projects (
-    id          SERIAL PRIMARY KEY,
-    name        VARCHAR(140) NOT NULL,
-    description VARCHAR(140),
-    repository  VARCHAR(140),
-    url         VARCHAR(140),
-    status      INTEGER
+  id          SERIAL PRIMARY KEY,
+  name        VARCHAR(140) NOT NULL,
+  description VARCHAR(140),
+  repository  VARCHAR(140),
+  url         VARCHAR(140),
+  status      INTEGER,
+  deleted     INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE TABLE tasks (
@@ -13,7 +14,8 @@ CREATE TABLE tasks (
   name        VARCHAR(140) NOT NULL,
   description VARCHAR(140),
   type        INTEGER,
-  statusId    INTEGER REFERENCES statuses (id)
+  statusId    INTEGER REFERENCES statuses (id),
+  deleted     INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE TABLE statuses (
@@ -21,18 +23,21 @@ CREATE TABLE statuses (
   projectId   INTEGER REFERENCES projects (id),
   name        VARCHAR(140) NOT NULL,
   description VARCHAR(140),
-  index       INTEGER
+  index       INTEGER,
+  deleted     INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE TABLE users (
-    id          SERIAL PRIMARY KEY,
-    name        VARCHAR(140) NOT NULL,
-    email       VARCHAR(140),
-    phone       VARCHAR(15)
+  id          SERIAL PRIMARY KEY,
+  name        VARCHAR(140) NOT NULL,
+  email       VARCHAR(140),
+  phone       VARCHAR(15),
+  deleted     INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE TABLE releases (
-    id          SERIAL PRIMARY KEY,
-    projectId   INTEGER REFERENCES projects (id),
-    version     varchar(140) NOT NULL
+  id          SERIAL PRIMARY KEY,
+  projectId   INTEGER REFERENCES projects (id),
+  version     varchar(140) NOT NULL,
+  deleted     INTEGER NOT NULL DEFAULT 0
 );

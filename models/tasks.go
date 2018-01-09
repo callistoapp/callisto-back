@@ -5,12 +5,13 @@ import (
 )
 
 type Task struct {
-	Id int `json:"id",db:"id"`
-	ProjectId int `json:"projectId",db:"projectId"`
-	Name string `json:"name",db:"name"`
+	Id          int    `json:"id",db:"id"`
+	ProjectId   int    `json:"projectId",db:"projectId"`
+	Name        string `json:"name",db:"name"`
 	Description string `json:"description",db:"description"`
-	Type int `json:"type",db:"type"`
-	StatusId int `json:"statusId",db:"statusId"`
+	Type        int    `json:"type",db:"type"`
+	StatusId    int    `json:"statusId",db:"statusId"`
+	Deleted     int    `json:"deleted",db:"deleted"`
 }
 
 // define custom GraphQL ObjectType `TaskType` for our Golang struct `Task`
@@ -38,6 +39,9 @@ var TaskType = graphql.NewObject(graphql.ObjectConfig{
 		"statusId": &graphql.Field{
 			Type: graphql.Int,
 		},
+		"deleted": &graphql.Field{
+			Type: graphql.Int,
+		},
 	},
 })
 
@@ -52,7 +56,7 @@ func AllTasks() ([]*Task, error) {
 
 	for rows.Next() {
 		tsk := new(Task)
-		err := rows.Scan(&tsk.Id, &tsk.ProjectId, &tsk.Name, &tsk.Description, &tsk.Type, &tsk.StatusId)
+		err := rows.Scan(&tsk.Id, &tsk.ProjectId, &tsk.Name, &tsk.Description, &tsk.Type, &tsk.StatusId, &tsk.Deleted)
 		if err != nil {
 			return nil, err
 		}
@@ -75,7 +79,7 @@ func TasksForProject(id int) ([]*Task, error) {
 
 	for rows.Next() {
 		tsk := new(Task)
-		err := rows.Scan(&tsk.Id, &tsk.ProjectId, &tsk.Name, &tsk.Description, &tsk.Type, &tsk.StatusId)
+		err := rows.Scan(&tsk.Id, &tsk.ProjectId, &tsk.Name, &tsk.Description, &tsk.Type, &tsk.StatusId, &tsk.Deleted)
 		if err != nil {
 			return nil, err
 		}
@@ -88,11 +92,11 @@ func TasksForProject(id int) ([]*Task, error) {
 }
 
 func NewTask(tsk Task) (error) {
-	stmt, err := db.Prepare("INSERT INTO tasks(projectId, name, description, type, status) VALUES($1, $2, $3, $4, $5)")
+	stmt, err := db.Prepare("INSERT INTO tasks(projectId, name, description, type, status, deleted) VALUES($1, $2, $3, $4, $5, $6)")
 	if err != nil {
 		return err
 	}
-	_, err = stmt.Exec(tsk.ProjectId, tsk.Name, tsk.Description, tsk.Type, tsk.StatusId)
+	_, err = stmt.Exec(tsk.ProjectId, tsk.Name, tsk.Description, tsk.Type, tsk.StatusId, tsk.Deleted)
 	if err != nil {
 		return err
 	}

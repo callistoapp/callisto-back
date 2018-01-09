@@ -24,7 +24,8 @@ var CreateRelease = &graphql.Field{
 		// perform mutation operation here
 		// for e.g. create a Release and save to DB.
 		newRelease := models.Release{
-			Version:   version,
+			Version: version,
+			Deleted: 0,
 		}
 
 		err := models.NewRelease(newRelease)

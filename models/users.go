@@ -6,12 +6,12 @@ import (
 )
 
 type User struct {
-	Id int `json:"id",db:"id"`
-	Name string `json:"name",db:"name"`
-	Email string `json:"email",db:"email"`
-	Phone string `json:"phone",db:"phone"`
+	Id      int    `json:"id",db:"id"`
+	Name    string `json:"name",db:"name"`
+	Email   string `json:"email",db:"email"`
+	Phone   string `json:"phone",db:"phone"`
+	Deleted int    `json:"deleted",db:"deleted"`
 }
-
 
 // define custom GraphQL ObjectType `UserType` for our Golang struct `User`
 // Note that
@@ -32,9 +32,11 @@ var UserType = graphql.NewObject(graphql.ObjectConfig{
 		"phone": &graphql.Field{
 			Type: graphql.String,
 		},
+		"deleted": &graphql.Field{
+			Type: graphql.Int,
+		},
 	},
 })
-
 
 func AllUsers() ([]*User, error) {
 	rows, err := db.Query(`SELECT * FROM users`)
@@ -47,7 +49,7 @@ func AllUsers() ([]*User, error) {
 
 	for rows.Next() {
 		usr := new(User)
-		err := rows.Scan(&usr.Name, &usr.Email, &usr.Phone)
+		err := rows.Scan(&usr.Name, &usr.Email, &usr.Phone, &usr.Deleted)
 		if err != nil {
 			return nil, err
 		}
@@ -60,11 +62,11 @@ func AllUsers() ([]*User, error) {
 }
 
 func NewUser(usr User) (error) {
-	stmt, err := db.Prepare("INSERT INTO users(name, email, phone) VALUES($1, $2, $3)")
+	stmt, err := db.Prepare("INSERT INTO users(name, email, phone, deleted) VALUES($1, $2, $3, $4)")
 	if err != nil {
 		return err
 	}
-	res, err := stmt.Exec(usr.Name, usr.Email, usr.Phone)
+	res, err := stmt.Exec(usr.Name, usr.Email, usr.Phone, usr.Deleted)
 	if err != nil {
 		return err
 	}

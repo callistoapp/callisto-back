@@ -35,7 +35,7 @@ var CreateTask = &graphql.Field{
 		projectId, _ := params.Args["projectId"].(int)
 		description, _ := params.Args["description"].(string)
 		taskType, _ := params.Args["type"].(int)
-		status, _ := params.Args["status"].(int)
+		statusId, _ := params.Args["statusId"].(int)
 
 		// perform mutation operation here
 		// for e.g. create a Task and save to DB.
@@ -44,7 +44,8 @@ var CreateTask = &graphql.Field{
 			ProjectId:   projectId,
 			Description: description,
 			Type:        taskType,
-			Status:      status,
+			StatusId:    statusId,
+			Deleted:     0,
 		}
 
 		err := models.NewTask(newTask)
@@ -63,7 +64,7 @@ var MoveTask = &graphql.Field{
 		"id": &graphql.ArgumentConfig{
 			Type: graphql.NewNonNull(graphql.Int),
 		},
-		"status": &graphql.ArgumentConfig{
+		"statusId": &graphql.ArgumentConfig{
 			Type: graphql.NewNonNull(graphql.Int),
 		},
 	},
@@ -71,9 +72,9 @@ var MoveTask = &graphql.Field{
 
 		// marshall and cast the argument value
 		id, _ := params.Args["id"].(int)
-		status, _ := params.Args["status"].(int)
+		statusId, _ := params.Args["statusId"].(int)
 
-		err := models.MoveTask(id, status)
+		err := models.MoveTask(id, statusId)
 
 		if err != nil {
 			return nil, err

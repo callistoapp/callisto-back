@@ -5,16 +5,17 @@ import (
 )
 
 type Project struct {
-	Id int `json:"id",db:"id"`
-	Name string `json:"name",db:"name"`
-	Description string `json:"description",db:"description"`
-	Repository string `json:"repository",db:"repository"`
-	Url string `json:"url",db:"url"`
-	Status int `json:"status",db:"status"`
-	Tasks []*Task `json:"tasks"`
-	Releases []*Release `json:"releases"`
+	Id          int        `json:"id",db:"id"`
+	Name        string     `json:"name",db:"name"`
+	Description string     `json:"description",db:"description"`
+	Repository  string     `json:"repository",db:"repository"`
+	Url         string     `json:"url",db:"url"`
+	Status      int        `json:"status",db:"status"`
+	Deleted     int        `json:"deleted",db:"deleted"`
+	Tasks       []*Task    `json:"tasks"`
+	Releases    []*Release `json:"releases"`
+	Statuses    []*Status  `json:"statuses"`
 }
-
 
 // define custom GraphQL ObjectType `ProjectType` for our Golang struct `Project`
 // Note that
@@ -47,16 +48,18 @@ var ProjectType = graphql.NewObject(graphql.ObjectConfig{
 		"releases": &graphql.Field{
 			Type: graphql.NewList(ReleaseType),
 		},
+		"statuses": &graphql.Field{
+			Type: graphql.NewList(StatusType),
+		},
 	},
 })
-
 
 func ProjectFromId(id int) (*Project, error) {
 	row := db.QueryRow(`SELECT * FROM projects WHERE id=$1`, id)
 
 	prj := new(Project)
 
-	err := row.Scan(&prj.Id, &prj.Name, &prj.Description, &prj.Repository, &prj.Url, &prj.Status)
+	err := row.Scan(&prj.Id, &prj.Name, &prj.Description, &prj.Repository, &prj.Url, &prj.Status, &prj.Deleted)
 	if err != nil {
 		return nil, err
 	}
@@ -65,25 +68,23 @@ func ProjectFromId(id int) (*Project, error) {
 
 	return prj, nil
 }
-
-
 
 func ProjectFromName(name string) (*Project, error) {
 	row := db.QueryRow(`SELECT * FROM projects WHERE name=$1`, name)
 
 	prj := new(Project)
 
-	err := row.Scan(&prj.Id, &prj.Name, &prj.Description, &prj.Repository, &prj.Url, &prj.Status)
+	err := row.Scan(&prj.Id, &prj.Name, &prj.Description, &prj.Repository, &prj.Url, &prj.Status, &prj.Deleted)
 	if err != nil {
 		return nil, err
 	}
 
 	prj.Tasks, err = TasksForProject(prj.Id)
+	prj.Releases, err = ReleasesForProject(prj.Id)
+	prj.Statuses, err = StatusesForProject(prj.Id)
 
 	return prj, nil
 }
-
-
 
 func AllProjects() ([]*Project, error) {
 	rows, err := db.Query(`SELECT * FROM projects`)
@@ -99,12 +100,13 @@ func AllProjects() ([]*Project, error) {
 		if err != nil {
 			return nil, err
 		}
-		err := rows.Scan(&prj.Id, &prj.Name, &prj.Description, &prj.Repository, &prj.Url, &prj.Status)
+		err := rows.Scan(&prj.Id, &prj.Name, &prj.Description, &prj.Repository, &prj.Url, &prj.Status, &prj.Deleted)
 		if err != nil {
 			return nil, err
 		}
 		prj.Tasks, err = TasksForProject(prj.Id)
 		prj.Releases, err = ReleasesForProject(prj.Id)
+		prj.Statuses, err = StatusesForProject(prj.Id)
 
 		prjs = append(prjs, prj)
 	}
@@ -116,7 +118,7 @@ func AllProjects() ([]*Project, error) {
 
 func NewProject(prj Project) (int, error) {
 	id := 0
-	err := db.QueryRow("INSERT INTO projects(name, description, repository, url, status) VALUES($1, $2, $3, $4, $5) RETURNING id", &prj.Name, &prj.Description, &prj.Repository, &prj.Url, 0).Scan(&id)
+	err := db.QueryRow("INSERT INTO projects(name, description, repository, url, status, deleted) VALUES($1, $2, $3, $4, $5, $6) RETURNING id", &prj.Name, &prj.Description, &prj.Repository, &prj.Url, &prj.Status, &prj.Deleted).Scan(&id)
 	if err != nil {
 		return 0, err
 	}
