@@ -68,6 +68,18 @@ func AllTasks() ([]*Task, error) {
 	return tsks, nil
 }
 
+func TaskFromId(id int) (*Task, error) {
+	row := db.QueryRow(`SELECT * FROM tasks WHERE id=$1`, id)
+
+	tsk := new(Task)
+
+	err := row.Scan(&tsk.Id, &tsk.ProjectId, &tsk.Name, &tsk.Description, &tsk.Type, &tsk.StatusId, &tsk.Deleted)
+	if err != nil {
+		return nil, err
+	}
+	return tsk, nil
+}
+
 func TasksForProject(id int) ([]*Task, error) {
 	rows, err := db.Query(`SELECT * FROM tasks WHERE projectId=$1`, id)
 	if err != nil {
@@ -110,6 +122,18 @@ func MoveTask(id int, status int) (error) {
 		return err
 	}
 	_, err = stmt.Exec(status, id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func DeleteTask(id int) (error) {
+	stmt, err := db.Prepare("DELETE FROM tasks WHERE id=$1")
+	if err != nil {
+		return err
+	}
+	_, err = stmt.Exec(id)
 	if err != nil {
 		return err
 	}

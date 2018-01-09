@@ -85,3 +85,29 @@ var MoveTask = &graphql.Field{
 		return allTasks, err
 	},
 }
+
+/*
+curl -g 'http://localhost:8080/graphql?query=mutation+_{createTask(name:"Task1"){id,text,done}}'
+*/
+var DeleteTask = &graphql.Field{
+	Type:        graphql.NewNonNull(graphql.Int), // the return type for this field
+	Description: "Delete a task",
+	Args: graphql.FieldConfigArgument{
+		"id": &graphql.ArgumentConfig{
+			Type: graphql.NewNonNull(graphql.Int),
+		},
+	},
+	Resolve: func(params graphql.ResolveParams) (interface{}, error) {
+
+		// marshall and cast the argument value
+		id, _ := params.Args["id"].(int)
+
+		err := models.DeleteTask(id)
+
+		if err != nil {
+			return 0, err
+		}
+
+		return 1, err
+	},
+}
