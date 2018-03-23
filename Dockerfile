@@ -11,7 +11,6 @@ WORKDIR /go/src/callisto
 RUN go get
 RUN go get github.com/tockins/realize
 
-EXPOSE 8080
-EXPOSE 5002
+EXPOSE 8081
 
 CMD realize start --run
