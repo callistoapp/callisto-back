@@ -1,0 +1,15 @@
+// Authorization service definition
+
+syntax = "proto3";
+
+service Authorize {
+  rpc Authorize (CallistoToken) returns (AuthInfo) {}
+}
+
+message CallistoToken {
+  string token = 1;
+}
+
+message AuthInfo {
+  bool logged = 1;
+}
