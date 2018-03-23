@@ -9,7 +9,12 @@ import (
 	"callisto/models"
 	"callisto/mutations"
 	"callisto/queries"
+	"google.golang.org/grpc"
+	pb "callisto/authorization"
+	"time"
+	"golang.org/x/net/context"
 )
+
 
 type QueryStruct struct {
 	Query string `json:"query"`
@@ -36,13 +41,28 @@ func executeQuery(query QueryStruct, schema graphql.Schema) *graphql.Result {
 	return result
 }
 
+func verifyToken(client pb.AuthorizeClient, token *pb.CallistoToken) {
+	fmt.Printf("Verifying token: (%d)\n", token.Token)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	logged, err := client.Authorize(ctx, token)
+	if err != nil {
+		fmt.Printf("%v.Authorize(_) = _, %v: ", client, err)
+	}
+	fmt.Println("Looks like a success ???")
+	fmt.Println(logged.Logged)
+}
+
+
 func main() {
-	models.InitDB("user=callisto dbname=callisto password=postgrespassword host=172.19.0.2 port=5432 sslmode=disable")
+	models.InitDB("user=callisto dbname=callisto password=postgrespassword host=postgres sslmode=disable")
 	http.HandleFunc("/graphql", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 		w.Header().Set("Access-Control-Allow-Headers",
 			"Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+
+		fmt.Println("Hello from /graphql")
 
 		if r.Body != nil && r.Method == "POST" {
 			decoder := json.NewDecoder(r.Body)
@@ -59,11 +79,29 @@ func main() {
 			defer r.Body.Close()
 			result := executeQuery(q, schema)
 			json.NewEncoder(w).Encode(result)
+			return
 		}
+		json.NewEncoder(w).Encode("please use post")
+	})
+
+	http.HandleFunc("/logged", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+		w.Header().Set("Access-Control-Allow-Headers",
+			"Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+
+		fmt.Println("Hello from /logged")
+		conn, err := grpc.Dial("auth:50051",  grpc.WithInsecure())
+		if err != nil {
+			fmt.Printf("fail to dial: %v", err)
+		}
+		defer conn.Close()
+		client := pb.NewAuthorizeClient(conn)
+		verifyToken(client, &pb.CallistoToken{Token: "nifejnovervrenvrereoj"})
 	})
 	// Display some basic instructions
-	fmt.Println("Now server is running on port 8080")
-	fmt.Println("Access the web app via browser at 'http://localhost:8080'")
+	fmt.Println("Now server is running on port 8081")
+	fmt.Println("Access the web app via browser at 'http://localhost:8081'")
 
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(":8081", nil)
 }
