@@ -6,7 +6,7 @@ import (
 	"github.com/go-siris/siris/core/errors"
 )
 
-//curl -g 'http://localhost:8080/graphql?query={projectList{id,name,desription}}'
+// curl -g 'http://localhost:8080/graphql?query={projectList{id,name,desription}}'
 var ListProjects = &graphql.Field{
 	Type:        graphql.NewList(models.ProjectType),
 	Description: "List of projects",
@@ -16,7 +16,7 @@ var ListProjects = &graphql.Field{
 	},
 }
 
-//curl -g 'http://localhost:8080/graphql?query={projectList{id,name,desription}}'
+// curl -g 'http://localhost:8080/graphql?query={projectList{id,name,desription}}'
 var GetProject = &graphql.Field{
 	Type:        models.ProjectType,
 	Args: graphql.FieldConfigArgument{
@@ -35,7 +35,7 @@ var GetProject = &graphql.Field{
 	},
 }
 
-//curl -g 'http://localhost:8080/graphql?query={projectByName{id,name,desription}}'
+// curl -g 'http://localhost:8080/graphql?query={projectByName{id,name,desription}}'
 var GetProjectByName = &graphql.Field{
 	Type:        models.ProjectType,
 	Args: graphql.FieldConfigArgument{
