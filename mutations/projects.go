@@ -3,6 +3,7 @@ package mutations
 import (
 	"github.com/graphql-go/graphql"
 	"callisto/models"
+	"reflect"
 )
 
 /*
@@ -24,8 +25,8 @@ var CreateProject = &graphql.Field{
 		"url": &graphql.ArgumentConfig{
 			Type: graphql.NewNonNull(graphql.String),
 		},
-		"status": &graphql.ArgumentConfig{
-			Type: graphql.Int,
+		"statuses": &graphql.ArgumentConfig{
+			Type: graphql.NewNonNull(graphql.NewList(graphql.String)),
 		},
 	},
 	Resolve: func(params graphql.ResolveParams) (interface{}, error) {
@@ -35,9 +36,20 @@ var CreateProject = &graphql.Field{
 		description, _ := params.Args["description"].(string)
 		repo, _ := params.Args["repo"].(string)
 		url, _ := params.Args["url"].(string)
+		statuses := reflect.ValueOf(params.Args["statuses"])
 
-		// perform mutation operation here
-		// for e.g. create a Project and save to DB.
+		allStatuses := make([]*models.Status, 0)
+
+		for i:=0; i<statuses.Len(); i++ {
+			s := new(models.Status)
+
+			s.Name = statuses.Index(i).Interface().(string)
+			s.Index = i
+			s.Deleted = 0
+
+			allStatuses = append(allStatuses, s)
+		}
+
 		newProject := models.Project{
 			Name:        	name,
 			Description: 	description,
@@ -45,6 +57,7 @@ var CreateProject = &graphql.Field{
 			Url:         	url,
 			Status:      	0,
 			Deleted:   		0,
+			Statuses: 		allStatuses,
 		}
 
 		id, err := models.NewProject(newProject)
