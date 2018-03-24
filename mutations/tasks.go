@@ -35,7 +35,7 @@ var CreateTask = &graphql.Field{
 		projectId, _ := params.Args["projectId"].(int)
 		description, _ := params.Args["description"].(string)
 		taskType, _ := params.Args["type"].(int)
-		statusId, _ := params.Args["statusId"].(int)
+		statusId, _ := params.Args["status"].(int)
 
 		// perform mutation operation here
 		// for e.g. create a Task and save to DB.
