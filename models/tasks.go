@@ -104,7 +104,7 @@ func TasksForProject(id int) ([]*Task, error) {
 }
 
 func NewTask(tsk Task) (error) {
-	stmt, err := db.Prepare("INSERT INTO tasks(projectId, name, description, type, status, deleted) VALUES($1, $2, $3, $4, $5, $6)")
+	stmt, err := db.Prepare("INSERT INTO tasks(projectId, name, description, type, statusId, deleted) VALUES($1, $2, $3, $4, $5, $6)")
 	if err != nil {
 		return err
 	}

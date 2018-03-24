@@ -122,5 +122,9 @@ func NewProject(prj Project) (int, error) {
 	if err != nil {
 		return 0, err
 	}
+	for _, status := range prj.Statuses {
+		status.ProjectId = id
+		NewStatus(*status)
+	}
 	return id, nil
 }
