@@ -65,6 +65,8 @@ func ProjectFromId(id int) (*Project, error) {
 	}
 
 	prj.Tasks, err = TasksForProject(prj.Id)
+	prj.Releases, err = ReleasesForProject(prj.Id)
+	prj.Statuses, err = StatusesForProject(prj.Id)
 
 	return prj, nil
 }
