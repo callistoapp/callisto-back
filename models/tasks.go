@@ -128,6 +128,19 @@ func MoveTask(id int, status int) (error) {
 	return nil
 }
 
+func EditTask(tsk Task) (error) {
+	// TODO: Add check on status
+	stmt, err := db.Prepare("UPDATE tasks SET name=$1, description=$2, type=$3, statusId=$4 WHERE id=$5")
+	if err != nil {
+		return err
+	}
+	_, err = stmt.Exec(tsk.Name, tsk.Description, tsk.Type, tsk.StatusId, tsk.Id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func DeleteTask(id int) (error) {
 	stmt, err := db.Prepare("DELETE FROM tasks WHERE id=$1")
 	if err != nil {
