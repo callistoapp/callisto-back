@@ -53,3 +53,22 @@ var GetProjectByName = &graphql.Field{
 		return models.Project{}, errors.New("Name is not ok")
 	},
 }
+
+// curl -g 'http://localhost:8080/graphql?query={projectByName{id,name,desription}}'
+var GetProjectById = &graphql.Field{
+	Type:        models.ProjectType,
+	Args: graphql.FieldConfigArgument{
+		"id": &graphql.ArgumentConfig{
+			Type: graphql.Int,
+		},
+	},
+	Description: "One project from its id",
+	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+		id, isOK := p.Args["id"].(int)
+		if isOK {
+			project, err := models.ProjectFromId(id)
+			return project, err
+		}
+		return models.Project{}, errors.New("Id is not ok")
+	},
+}
