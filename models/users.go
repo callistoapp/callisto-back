@@ -13,6 +13,15 @@ type User struct {
 	Deleted int    `json:"deleted",db:"deleted"`
 }
 
+
+type AuthenticatedUser struct {
+	Id       int    `json:"id"`
+	Username string `json:"username"`
+	Email    string `json:"email"`
+	GithubId string `json:"githubId"`
+	GoogleId string `json:"googleId"`
+}
+
 // define custom GraphQL ObjectType `UserType` for our Golang struct `User`
 // Note that
 // - the fields in our UserType maps with the json tags for the fields in our struct
