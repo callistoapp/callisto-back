@@ -11,12 +11,10 @@ import (
 )
 
 func main() {
-	r := mux.NewRouter().StrictSlash(true)
-	graphqlRouter := r.PathPrefix("/graphql").Subrouter()
-	graphqlRouter.HandleFunc("/", handlers.GraphqlHandler)
-	graphqlRouter.Use(middlewares.AuthMiddleware)
-
+	r := mux.NewRouter()
+	r.HandleFunc("/graphql", handlers.GraphqlHandler)
 	r.HandleFunc("/", handlers.HomeHandler)
+	r.Use(middlewares.AuthMiddleware)
 
 	n := negroni.Classic() // Includes some default middlewares
 	n.UseHandler(r)

@@ -10,9 +10,13 @@ import (
 
 func AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "POST" || r.RequestURI != "/graphql" {
+			next.ServeHTTP(w, r)
+			return
+		}
 		cookie, err := r.Cookie("connect.sid")
 		if err != nil || cookie == nil {
-			http.Error(w, "Forbidden", http.StatusForbidden)
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
 
