@@ -62,7 +62,9 @@ var CreateProject = &graphql.Field{
 
 		id, err := models.NewProject(newProject)
 
-		return id, err
+		newProject.Id = id
+
+		return newProject, err
 	},
 }
 
