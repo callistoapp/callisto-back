@@ -119,7 +119,7 @@ func AllProjects() ([]*Project, error) {
 }
 
 func NewProject(prj Project) (int, error) {
-	id := 0
+	var id int
 	err := db.QueryRow("INSERT INTO projects(name, description, repository, url, status, deleted) VALUES($1, $2, $3, $4, $5, $6) RETURNING id", &prj.Name, &prj.Description, &prj.Repository, &prj.Url, &prj.Status, &prj.Deleted).Scan(&id)
 	if err != nil {
 		return 0, err
