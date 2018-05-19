@@ -15,5 +15,6 @@ var Mutations = graphql.NewObject(graphql.ObjectConfig{
 		"moveTask": MoveTask,
 		"deleteTask": DeleteTask,
 		"editTask": EditTask,
+		"editStatus": EditStatus,
 	},
 })

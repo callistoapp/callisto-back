@@ -98,3 +98,20 @@ func NewStatus(stt Status) (error) {
 	}
 	return nil
 }
+
+func EditStatus(stt Status) (*Status, error) {
+	var id int
+	err := db.QueryRow("UPDATE statuses SET name=$1 WHERE id=$2 returning id", stt.Name, stt.Id).Scan(&id)
+	if err != nil {
+		return nil, err
+	}
+	row := db.QueryRow(`SELECT * FROM statuses WHERE id=$1`, id)
+	st := new(Status)
+
+	err = row.Scan(&st.Id, &st.ProjectId, &st.Name, &st.Description, &st.Index, &st.Deleted)
+	if err != nil {
+		return nil, err
+	}
+
+	return st, nil
+}
