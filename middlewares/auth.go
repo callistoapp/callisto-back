@@ -33,7 +33,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 		} else {
 			req.AddCookie(cookie)
 			resp, err := client.Do(req)
-			if err != nil {
+			if err != nil || resp.StatusCode == 401 {
 				http.Error(w, "Unauthorized", http.StatusUnauthorized)
 				return
 			}
