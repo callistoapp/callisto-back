@@ -18,7 +18,7 @@ type AuthenticatedUser struct {
 	Id       int    `json:"id"`
 	Username string `json:"username"`
 	Email    string `json:"email"`
-	GithubId string `json:"githubId"`
+	GithubId int 	`json:"githubId"`
 	GoogleId string `json:"googleId"`
 }
 
@@ -46,6 +46,33 @@ var UserType = graphql.NewObject(graphql.ObjectConfig{
 		},
 	},
 })
+
+// define custom GraphQL ObjectType `UserType` for our Golang struct `User`
+// Note that
+// - the fields in our UserType maps with the json tags for the fields in our struct
+// - the field type matches the field type in our struct
+var LoggedUserType = graphql.NewObject(graphql.ObjectConfig{
+	Name: "LoggedUser",
+	Fields: graphql.Fields{
+		"id": &graphql.Field{
+			Type: graphql.Int,
+		},
+		"username": &graphql.Field{
+			Type: graphql.String,
+		},
+		"email": &graphql.Field{
+			Type: graphql.String,
+		},
+		"githubId": &graphql.Field{
+			Type: graphql.Int,
+		},
+		"googleId": &graphql.Field{
+			Type: graphql.String,
+		},
+	},
+})
+
+
 
 func AllUsers() ([]*User, error) {
 	rows, err := db.Query(`SELECT * FROM users`)

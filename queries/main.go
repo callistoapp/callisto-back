@@ -11,6 +11,7 @@ import (
 var Queries = graphql.NewObject(graphql.ObjectConfig{
 	Name: "RootQuery",
 	Fields: graphql.Fields{
+		"loggedUser": GetLoggedUser,
 		"projectList": ListProjects,
 		"project": GetProject,
 		"projectByName": GetProjectByName,
