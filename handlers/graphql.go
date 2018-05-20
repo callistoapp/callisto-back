@@ -7,7 +7,8 @@ import (
 	"github.com/graphql-go/graphql"
 	"callisto/queries"
 	"callisto/mutations"
-	"github.com/gorilla/context"
+	gorillaContext "github.com/gorilla/context"
+	"context"
 )
 
 type QueryStruct struct {
@@ -22,11 +23,12 @@ var GraphqlSchema, _ = graphql.NewSchema(graphql.SchemaConfig{
 	Mutation: mutations.Mutations,
 })
 
-func ExecuteQuery(query QueryStruct, schema graphql.Schema) *graphql.Result {
+func ExecuteQuery(query QueryStruct, schema graphql.Schema, ctx context.Context) *graphql.Result {
 	result := graphql.Do(graphql.Params{
 		Schema:        schema,
 		RequestString: query.Query,
 		VariableValues: query.Variables,
+		Context: ctx,
 	})
 	if len(result.Errors) > 0 {
 		fmt.Printf("wrong result, unexpected errors: %v", result.Errors)
@@ -42,12 +44,12 @@ func GraphqlHandler(w http.ResponseWriter, r *http.Request) {
 		"Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 
 	if r.Method != "POST" {
-		fmt.Println(r.Method)
 		return
 	}
 
-	loggedUser := context.Get(r, "loggedUser")
-	fmt.Println("Get context ? : ", loggedUser)
+	loggedUser := gorillaContext.Get(r, "loggedUser")
+	ctx := context.WithValue(context.Background(), "loggedUser", loggedUser)
+
 
 	if r.Body != nil {
 		decoder := json.NewDecoder(r.Body)
@@ -58,7 +60,7 @@ func GraphqlHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		defer r.Body.Close()
-		result := ExecuteQuery(q, GraphqlSchema)
+		result := ExecuteQuery(q, GraphqlSchema, ctx)
 		json.NewEncoder(w).Encode(result)
 		return
 	}
