@@ -1,7 +1,6 @@
 package models
 
 import (
-	"log"
 	"github.com/graphql-go/graphql"
 )
 
@@ -77,18 +76,15 @@ func ReleasesForProject(id int) ([]*Release, error) {
 	if err = rows.Err(); err != nil {
 		return nil, err
 	}
+
 	return releases, nil
 }
 
 func NewRelease(rel Release) (error) {
-	stmt, err := db.Prepare("INSERT INTO releases(version, deleted) VALUES($1, $2)")
+	stmt, err := db.Prepare("INSERT INTO releases(version, projectId, deleted) VALUES($1, $2, $3)")
 	if err != nil {
 		return err
 	}
-	res, err := stmt.Exec(rel.Version, rel.Deleted)
-	if err != nil {
-		return err
-	}
-	log.Printf("Result = %+v", res)
-	return nil
+	_, err = stmt.Exec(rel.Version, rel.ProjectId, rel.Deleted)
+	return err
 }

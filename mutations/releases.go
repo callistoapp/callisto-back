@@ -15,17 +15,22 @@ var CreateRelease = &graphql.Field{
 		"version": &graphql.ArgumentConfig{
 			Type: graphql.NewNonNull(graphql.String),
 		},
+		"projectId": &graphql.ArgumentConfig{
+			Type: graphql.NewNonNull(graphql.Int),
+		},
 	},
 	Resolve: func(params graphql.ResolveParams) (interface{}, error) {
 
 		// marshall and cast the argument value
 		version, _ := params.Args["version"].(string)
+		projectId, _ := params.Args["projectId"].(int)
 
 		// perform mutation operation here
 		// for e.g. create a Release and save to DB.
 		newRelease := models.Release{
-			Version: version,
-			Deleted: 0,
+			ProjectId: projectId,
+			Version:   version,
+			Deleted:   0,
 		}
 
 		err := models.NewRelease(newRelease)
