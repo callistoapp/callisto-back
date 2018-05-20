@@ -64,20 +64,20 @@ func ReleasesForProject(id int) ([]*Release, error) {
 	}
 	defer rows.Close()
 
-	rels := make([]*Release, 0)
+	releases := make([]*Release, 0)
 
 	for rows.Next() {
-		rel := new(Release)
-		err := rows.Scan(&rel.Id, &rel.ProjectId, &rel.Version, &rel.Deleted)
+		release := new(Release)
+		err := rows.Scan(&release.Id, &release.ProjectId, &release.Version, &release.Deleted)
 		if err != nil {
 			return nil, err
 		}
-		rels = append(rels, rel)
+		releases = append(releases, release)
 	}
 	if err = rows.Err(); err != nil {
 		return nil, err
 	}
-	return rels, nil
+	return releases, nil
 }
 
 func NewRelease(rel Release) (error) {

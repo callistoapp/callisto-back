@@ -19,5 +19,6 @@ var Queries = graphql.NewObject(graphql.ObjectConfig{
 		"releaseList": ListReleases,
 		"taskList": ListTasks,
 		"task": GetTask,
+		"releasesForProject": GetReleasesForProject,
 	},
 })
