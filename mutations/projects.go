@@ -73,7 +73,7 @@ curl -g 'http://localhost:8080/graphql?query=mutation+_{createProject(name:"Test
 */
 var UpdateProject = &graphql.Field{
 	Type:        models.ProjectType, // the return type for this field
-	Description: "Create new project",
+	Description: "Update project",
 	Args: graphql.FieldConfigArgument{
 		"id": &graphql.ArgumentConfig{
 			Type: graphql.NewNonNull(graphql.Int),
@@ -117,5 +117,25 @@ var UpdateProject = &graphql.Field{
 
 		project, err := models.ProjectFromId(id)
 		return project, err
+	},
+}
+
+/*
+curl -g 'http://localhost:8080/graphql?query=mutation+_{createProject(name:"Test",description:"Test",repository:"Test",url:"Test.com",status:2){id,name,description}}'
+*/
+var DeleteProject = &graphql.Field{
+	Type:        models.ProjectType, // the return type for this field
+	Description: "Delete existing project",
+	Args: graphql.FieldConfigArgument{
+		"id": &graphql.ArgumentConfig{
+			Type: graphql.NewNonNull(graphql.Int),
+		},
+	},
+	Resolve: func(params graphql.ResolveParams) (interface{}, error) {
+		// marshall and cast the argument value
+		id, _ := params.Args["id"].(int)
+
+		err := models.DeleteProject(id)
+		return nil, err
 	},
 }

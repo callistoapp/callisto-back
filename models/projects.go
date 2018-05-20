@@ -143,3 +143,13 @@ func UpdateProject(prj Project) error {
 }
 
 
+func DeleteProject(id int) error {
+	stmt, err := db.Prepare("UPDATE projects set deleted = 1 WHERE id = $1")
+	if err != nil {
+		return err
+	}
+
+	_, err = stmt.Exec(id)
+
+	return err
+}
