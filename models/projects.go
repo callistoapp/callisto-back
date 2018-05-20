@@ -55,7 +55,7 @@ var ProjectType = graphql.NewObject(graphql.ObjectConfig{
 })
 
 func ProjectFromId(id int) (*Project, error) {
-	row := db.QueryRow(`SELECT * FROM projects WHERE id=$1`, id)
+	row := db.QueryRow(`SELECT * FROM projects WHERE id=$1 AND deleted = 0`, id)
 
 	prj := new(Project)
 
@@ -72,7 +72,7 @@ func ProjectFromId(id int) (*Project, error) {
 }
 
 func ProjectFromName(name string) (*Project, error) {
-	row := db.QueryRow(`SELECT * FROM projects WHERE name=$1`, name)
+	row := db.QueryRow(`SELECT * FROM projects WHERE name=$1 AND deleted = 0`, name)
 
 	prj := new(Project)
 
@@ -89,7 +89,7 @@ func ProjectFromName(name string) (*Project, error) {
 }
 
 func AllProjects() ([]*Project, error) {
-	rows, err := db.Query(`SELECT * FROM projects`)
+	rows, err := db.Query(`SELECT * FROM projects WHERE deleted = 0`)
 	if err != nil {
 		return nil, err
 	}
@@ -130,3 +130,16 @@ func NewProject(prj Project) (int, error) {
 	}
 	return id, nil
 }
+
+func UpdateProject(prj Project) error {
+	stmt, err := db.Prepare("UPDATE projects set name = $1, description = $2, repository = $3, url = $4 WHERE id = $5")
+	if err != nil {
+		return err
+	}
+
+	_, err = stmt.Exec(&prj.Name, &prj.Description, &prj.Repository, &prj.Url, &prj.Id)
+
+	return err
+}
+
+
