@@ -3,7 +3,6 @@ package queries
 import (
 	"github.com/graphql-go/graphql"
 	"callisto/models"
-	"fmt"
 )
 
 //curl -g 'http://localhost:8080/graphql?query={userList{id,name,desription}}'
@@ -22,7 +21,6 @@ var GetLoggedUser = &graphql.Field{
 	Description: "Logged user",
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 		loggedUser := p.Context.Value("loggedUser").(models.AuthenticatedUser)
-		fmt.Println("loggedUser")
 		return loggedUser, nil
 	},
 }
