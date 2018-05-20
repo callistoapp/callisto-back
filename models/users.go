@@ -17,9 +17,13 @@ type User struct {
 type AuthenticatedUser struct {
 	Id       int    `json:"id"`
 	Username string `json:"username"`
+	Fullname string `json:"fullname"`
+	Firstname string `json:"firstname"`
+	Lastname string `json:"lastname"`
 	Email    string `json:"email"`
 	GithubId int 	`json:"githubId"`
 	GoogleId string `json:"googleId"`
+	Avatar string `json:"avatar"`
 }
 
 // define custom GraphQL ObjectType `UserType` for our Golang struct `User`
@@ -67,6 +71,18 @@ var LoggedUserType = graphql.NewObject(graphql.ObjectConfig{
 			Type: graphql.Int,
 		},
 		"googleId": &graphql.Field{
+			Type: graphql.String,
+		},
+		"avatar": &graphql.Field{
+			Type: graphql.String,
+		},
+		"fullname": &graphql.Field{
+			Type: graphql.String,
+		},
+		"firstname": &graphql.Field{
+			Type: graphql.String,
+		},
+		"lastname": &graphql.Field{
 			Type: graphql.String,
 		},
 	},
