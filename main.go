@@ -14,6 +14,7 @@ func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/graphql", handlers.GraphqlHandler)
 	r.HandleFunc("/", handlers.HomeHandler)
+	r.HandleFunc("/health", handlers.HealthHandler)
 	r.Use(middlewares.AuthMiddleware)
 
 	n := negroni.Classic() // Includes some default middlewares
