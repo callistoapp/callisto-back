@@ -1,0 +1,13 @@
+FROM golang:latest
+
+RUN mkdir -p /go/src/callisto
+
+ADD . /go/src/callisto
+
+WORKDIR /go/src/callisto
+
+RUN go get
+
+EXPOSE 8081
+
+RUN go build
