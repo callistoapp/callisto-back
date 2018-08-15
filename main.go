@@ -20,7 +20,7 @@ func main() {
 	n := negroni.Classic() // Includes some default middlewares
 	n.UseHandler(r)
 
-	models.InitDB("user=callisto dbname=callisto password=postgrespassword host=postgres sslmode=disable")
+	models.InitDB("user=callisto dbname=callisto password=postgrespassword host=postgresql.callisto sslmode=disable")
 
 	http.ListenAndServe(":8081", n)
 }
